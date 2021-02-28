@@ -1,6 +1,8 @@
 #!/usr/bin/env python3
 from N2G import drawio_diagram
-import re, ipaddress
+import re, ipaddress, os
+
+os.system("sed -i 's/\"//g' lab.conf")
 # Adding in colourful text
 class Colour:
     Black = "\u001b[30m"
@@ -86,7 +88,7 @@ for hostname in hostnames:
     startupfile.close()
 allsubnets = list(dict.fromkeys(allsubnets))
 while True:
-    check = input("1 - Make draw.io image\n2 - Output data to screen\n3 - Exit\n>")
+    check = input("1 - Make draw.io image\n2 - Output data to screen\n3 - Make linfo image\n4 - Exit\n>")
     if check == "1":
         diagram = drawio_diagram()
         diagram.add_diagram("Page-1")
@@ -117,4 +119,6 @@ while True:
                     print(f"{Colour.titles}Ports:{Colour.Reset}")
                     [print(port.strip()) for port in machine.ports]
     elif check == "3":
+        os.system("linfo -a -m test.png")
+    elif check == "4":
         break
