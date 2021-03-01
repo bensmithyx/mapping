@@ -3,9 +3,10 @@ from N2G import drawio_diagram
 import re, ipaddress, os, sys
 import random
 # overloading drawio_diagram functions
+
 import xml.etree.ElementTree as ET
 class customDiagram(drawio_diagram):
-
+    counter=0
     # def __init__(self,*args, **kwargs):
     #     self.drawing = ET.fromstring(self.drawio_drawing_xml)
     #     self.nodes_ids = {}  # dictionary of {diagram_name: [node_id1, node_id2]}
@@ -24,40 +25,13 @@ class customDiagram(drawio_diagram):
         #variables to change - hostname, rules, ports, eth0, eth1, eth2, ipe0, ipe1, ipe2, xmlId
     def add_node(self,xmlId,hostname,rules,ports,eth0,eth1,eth2,ipe0,ipe1,ipe2,label="",data={},url="",style="",width=120,height=60,x_pos=200,y_pos=150,**kwargs):
         #reset xml entity
-        template = """
-    <mxCell id="{id}-1" value="" style="group" vertex="1" connectable="0" parent="1">
-      <mxGeometry x="240" y="340" width="239" height="220" as="geometry" />
-    </mxCell>
-    <mxCell id="{id}-2" value="rules" style="rounded=0;whiteSpace=wrap;html=1;shadow=0;glass=0;sketch=0;" vertex="1" parent="{id}-1">
-      <mxGeometry x="0.5" y="180" width="238.5" height="40" as="geometry" />
-    </mxCell>
-    <mxCell id="{id}-3" value="" style="group;fillColor=none;gradientColor=none;rounded=1;shadow=0;glass=0;sketch=0;" vertex="1" connectable="0" parent="{id}-1">
-      <mxGeometry width="239" height="180" as="geometry" />
-    </mxCell>
-    <mxCell id="{id}-4" value="ports" style="rounded=0;whiteSpace=wrap;html=1;" vertex="1" parent="{id}-3">
-      <mxGeometry x="60" y="90" width="120" height="90" as="geometry" />
-    </mxCell>
-    <mxCell id="{id}-5" value="eth2" style="rounded=0;whiteSpace=wrap;html=1;rotation=-90;" vertex="1" parent="{id}-3">
-      <mxGeometry x="135" y="105" width="120" height="30" as="geometry" />
-    </mxCell>
-    <mxCell id="{id}-6" value="eth0" style="rounded=0;whiteSpace=wrap;html=1;rotation=90;" vertex="1" parent="{id}-3">
-      <mxGeometry x="-15" y="105" width="120" height="30" as="geometry" />
-    </mxCell>
-    <mxCell id="{id}-7" value="ipe2" style="rounded=0;whiteSpace=wrap;html=1;rotation=-90;" vertex="1" parent="{id}-3">
-      <mxGeometry x="164" y="105" width="120" height="30" as="geometry" />
-    </mxCell>
-    <mxCell id="{id}-8" value="ipe0" style="rounded=0;whiteSpace=wrap;html=1;rotation=90;" vertex="1" parent="{id}-3">
-      <mxGeometry x="-45" y="105" width="120" height="30" as="geometry" />
-    </mxCell>
-    <mxCell id="{id}-9" value="eth1" style="rounded=0;whiteSpace=wrap;html=1;rotation=0;" vertex="1" parent="{id}-3">
-      <mxGeometry x="60" y="30" width="120" height="30" as="geometry" />
-    </mxCell>
-    <mxCell id="{id}-10" value="ipe1" style="rounded=0;whiteSpace=wrap;html=1;rotation=0;" vertex="1" parent="{id}-3">
-      <mxGeometry x="60" width="120" height="30" as="geometry" />
-    </mxCell>
-    <mxCell id="{id}-11" value="hostname" style="rounded=0;whiteSpace=wrap;html=1;" vertex="1" parent="{id}-3">
-      <mxGeometry x="60" y="60" width="120" height="30" as="geometry" />
-    </mxCell>"""
+        self.counter+=1
+        print(self.counter)
+        template = """<object id="{id}" label="{label}">
+      <mxCell style="{style}" vertex="1" parent="1">
+          <mxGeometry x="{x_pos}" y="{y_pos}" width="{width}" height="{height}" as="geometry"/>
+      </mxCell>
+    </object>"""
 
         """
 
@@ -90,7 +64,7 @@ class customDiagram(drawio_diagram):
         node_data = {}
         if super(customDiagram, self)._node_exists(xmlId, label=label,hostname=hostname, data=data, url=url):
             return
-        self.nodes_ids[self.current_diagram_id].append(id)
+        self.nodes_ids[self.current_diagram_id].append(xmlId)
         if not label.strip():
             label = xmlId
         # try to get style from file
@@ -119,14 +93,16 @@ class customDiagram(drawio_diagram):
         # )
         # print(f"\n\n\n\{formatted}\n\n\n")
         #run pls
-        formatted = template.format(id=xmlId)
+        # formatted = template.format(id=xmlId)
 
         self.drawio_node_object_xml = """<object id="{id}" label="{label}">
       <mxCell style="{style}" vertex="1" parent="1">
           <mxGeometry x="{x_pos}" y="{y_pos}" width="{width}" height="{height}" as="geometry"/>
       </mxCell>
     </object>"""
+        formatted=self.drawio_node_object_xml.format(id=xmlId,label=xmlId,style=self.default_node_style,x_pos=x_pos,y_pos=y_pos,width=120,height=60)
         self.drawio_node_object_xml=self.drawio_node_object_xml.format(id=xmlId,label=label,style=self.default_node_style,x_pos=x_pos,y_pos=y_pos,width=120,height=60)
+        self.drawio_node_object_xml=formatted
         node = ET.fromstring(formatted)
         # add data attributes and/or url to node
         node_data.update(data)
@@ -262,13 +238,13 @@ if os.path.isdir(path):
 
             diagram.layout(algo="circle")
             diagram.dump_file(filename="Sample_graph.drawio", folder="./")
-            with open("Sample_graph.drawio","r+") as file:
-                file.seek(0)
-                file.write("""<mxGraphModel dx="1098" dy="583" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="827" pageHeight="1169" math="0" shadow="0">
-                  <root>""")
-            with open("Sample_graph.drawio","a") as file:
-                file.write("""</root>
-                </mxGraphModel>""")
+            # with open("Sample_graph.drawio","r+") as file:
+            #     file.seek(0)
+            #     file.write("""<mxGraphModel dx="1098" dy="583" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="827" pageHeight="1169" math="0" shadow="0">
+            #       <root>""")
+            # with open("Sample_graph.drawio","a") as file:
+            #     file.write("""</root>
+            #     </mxGraphModel>""")
         elif check == "2":
             for subnet in allsubnets:
                 print(f"\n{Colour.White}{'-'*10}\nSubnet {subnet}\n{'-'*10}{Colour.Reset}")
