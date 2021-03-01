@@ -106,8 +106,8 @@ if os.path.isdir(path):
                     if subnet in machine.subnets:
                         diagram.add_link(subnet, machine.hostname)
 
-            diagram.layout(algo="kk")
-            diagram.dump_file(filename="Sample_graph.draw.io", folder="./")
+            diagram.layout(algo="circle")
+            diagram.dump_file(filename="Sample_graph.drawio", folder="./")
         elif check == "2":
             for subnet in allsubnets:
                 print(f"\n{Colour.White}{'-'*10}\nSubnet {subnet}\n{'-'*10}{Colour.Reset}")
