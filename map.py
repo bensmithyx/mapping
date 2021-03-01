@@ -6,27 +6,27 @@ import random
 import xml.etree.ElementTree as ET
 
 class customDiagram(drawio_diagram):
-
+    fillColour="#FFFFFF"
     def addToNodes(self,formattedXML):
         node = ET.fromstring(formattedXML)
         self.current_root.append(node)
 
-    def addRectangle(self,xmlId,parentId,value,x_pos,y_pos,width,height):
+    def addRectangle(self,xmlId,parentId,value,x_pos,y_pos,width,height,rotateStyle=""):
         rectangle="""
-                <mxCell id="{id}" value="{value}" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#2a2a2a;" vertex="1" parent="{parentId}">
+                <mxCell id="{id}" value="{value}" style="rounded=0;whiteSpace=wrap;html=1;fillColor={fillColour};{rotateStyle}" vertex="1" parent="{parentId}">
                     <mxGeometry x="{x_pos}" y="{y_pos}" width="{width}" height="{height}" as="geometry" />
             </mxCell>
                 """
-        formatted=rectangle.format(id=xmlId,value=value,parentId=parentId,style=self.default_node_style,x_pos=x_pos,y_pos=y_pos,width=120,height=60)
+        formatted=rectangle.format(id=xmlId,value=value,parentId=parentId,style=self.default_node_style,x_pos=x_pos,y_pos=y_pos,width=width,height=height,fillColour=self.fillColour,rotateStyle=rotateStyle)
         self.addToNodes(formatted)
 
     def addContainer(self,xmlId,x_pos,y_pos,width,height):
         containerTemplate="""
         <mxCell id="{id}-3" value="" style="group" vertex="1" connectable="0" parent="1">
-            <mxGeometry x="{x_pos}" y="{y_pos}" width="120" height="120" as="geometry" />
+            <mxGeometry x="{x_pos}" y="{y_pos}" width="{width}" height="{height}" as="geometry" />
             </mxCell>
                 """
-        formatted=containerTemplate.format(id=xmlId,label=xmlId,style=self.default_node_style,x_pos=str(random.randint(100,500)),y_pos=str(random.randint(100,500)),width=120,height=60)
+        formatted=containerTemplate.format(id=xmlId,label=xmlId,style=self.default_node_style,x_pos=str(random.randint(0,2500)),y_pos=str(random.randint(0,2500)),width=width,height=height)
         self.addToNodes(formatted)
 
     def add_node(self,xmlId,hostname,rules,ports,eth0,eth1,eth2,ipe0,ipe1,ipe2,label="",data={},url="",style="",width=120,height=60,x_pos=200,y_pos=150,**kwargs):
@@ -41,32 +41,56 @@ class customDiagram(drawio_diagram):
         if os.path.isfile(style[:5000]):
             with open(style, "r") as style_file:
                 style = style_file.read()
-        # create node element with new
-        #
-        # formatted=template.format(
-        #     xmlId=xmlId,
-        #     label=label,
-        #     hostname = hostname,
-        #     rules=rules,
-        #     ports=ports,
-        #     eth0=eth0,
-        #     eth1=eth1,
-        #     eth2=eth2,
-        #     ipe0=ipe0,
-        #     ipe1=ipe1,
-        #     ipe2=ipe2,
-        #     width=width if str(width).strip() else 120,
-        #     height=height if str(height).strip() else 60,
-        #     x_pos=x_pos,
-        #     y_pos=y_pos,
-        #     style=style if style else self.default_node_style,
-        # )
-
+        #x="250" y="240" width="239" height="220"
+        #  <mxGeometry width="239" height="180" as="geometry" />
         #add container
-        self.addContainer(xmlId,x_pos,y_pos,width,height)
+        self.addContainer(xmlId,0,300,239,220)
         #add individual rectangle
-        self.addRectangle(f"{xmlId}-1",f"{xmlId}-3",f"{xmlId}","410","180",width,height)
-        self.addRectangle(f"{xmlId}-2",f"{xmlId}-3",f"{xmlId}","410","240",width,height)
+
+        #Rules
+        # <mxGeometry x="0.5" y="180" width="238.5" height="40" as="geometry" />
+        self.addRectangle(f"{xmlId}-rules",f"{xmlId}-3",f"{xmlId}-rules",0.5,180,238.5,40)
+
+        #empty
+        #   <mxGeometry width="239" height="180" as="geometry" />
+        # self.addRectangle(f"{xmlId}-empty1",f"{xmlId}-3",f"{xmlId}-empty",x_pos,y_pos,239,180)
+
+        #ports
+        # <mxGeometry x="60" y="90" width="120" height="90" as="geometry" />
+        self.addRectangle(f"{xmlId}-ports",f"{xmlId}-3",f"{xmlId}-ports",60,90,120,90)
+
+        #eth2
+        # <mxGeometry x="135" y="105" width="120" height="30" as="geometry" />
+        self.addRectangle(f"{xmlId}-eth2",f"{xmlId}-3",f"{xmlId}-eth2",135,105,120,30,"rotation=-90;")
+
+        #eth0
+        # <mxGeometry x="-15" y="105" width="120" height="30" as="geometry" />
+        self.addRectangle(f"{xmlId}-eth0",f"{xmlId}-3",f"{xmlId}-eth0",-15,105,120,30,"rotation=90;")
+
+        #ip - eth2ip
+        # <mxGeometry x="164" y="105" width="120" height="30" as="geometry" />
+        self.addRectangle(f"{xmlId}-eth2ip",f"{xmlId}-3",f"{xmlId}-eth2ip",164,105,120,30,"rotation=-90;")
+
+        #ip2 - eth0ip
+        #<mxGeometry x="-45" y="105" width="120" height="30" as="geometry" />
+        self.addRectangle(f"{xmlId}-eth0ip",f"{xmlId}-3",f"{xmlId}-eth0ip",-45,105,120,30,"rotation=90;")
+
+        #eth1 -
+        # <mxGeometry x="60" y="30" width="120" height="30" as="geometry" />
+        self.addRectangle(f"{xmlId}-eth1",f"{xmlId}-3",f"{xmlId}-eth1",60,30,120,30)
+
+        #eth1ip
+        # <mxGeometry x="60" width="120" height="30" as="geometry" />
+        self.addRectangle(f"{xmlId}-eth1ip",f"{xmlId}-3",f"{xmlId}-eth1ip",60,0,120,30)
+
+        #hostname
+        # <mxGeometry x="60" y="60" width="120" height="30" as="geometry" />
+        self.addRectangle(f"{xmlId}-hostname",f"{xmlId}-3",f"{xmlId}-hostname",60,60,120,30)
+
+        # self.addRectangle(f"{xmlId}-1",f"{xmlId}-3",f"{xmlId}-value",0,0,width,height)
+        # self.addRectangle(f"{xmlId}-2",f"{xmlId}-3",f"{xmlId}-value2",0,height,width,height)
+        # self.addRectangle(f"{xmlId}-1",f"{xmlId}-3",f"{xmlId}-value","410","180",width,height)
+        # self.addRectangle(f"{xmlId}-2",f"{xmlId}-3",f"{xmlId}-value2","410","240",width,height)
 
 path = sys.argv[1]
 if os.path.isdir(path):
@@ -84,13 +108,14 @@ if os.path.isdir(path):
         Reset = "\u001b[0m"
         titles = Cyan
     class machine:
-        def __init__(self,hostname,interfaces,ips,rules,subnets,ports):
+        def __init__(self,hostname,interfaces,ips,rules,subnets,ports,routes):
             self.hostname = hostname
             self.interfaces = interfaces
             self.ips = ips
             self.rules = rules
             self.subnets = subnets
             self.ports = ports
+            self.routes = routes
     # Opening lab.conf to find all of the hostnames
     with open(f"{path}/lab.conf","r") as files:
         file = files.read()
@@ -112,6 +137,7 @@ if os.path.isdir(path):
             rules = []
             subnets = []
             ports = []
+            routes = {}
             # Finding all need data from files
             for line in filecontents:
                 if "ifconfig" in line:
@@ -136,6 +162,13 @@ if os.path.isdir(path):
                         ports.append(port)
                 elif "service" in line or "start" in line:
                     ports.append(line)
+                if "route add" in line:
+                    matches = re.findall(r"gw\s+([\d\.]+)",line)
+                    if line.split()[2] == "default":
+                        routes[matches[0]] = "default"
+                    elif line.split()[2] == "-net":
+                        routes[matches[0]] = "normal"
+
         with open(f"{path}/{hostname}.startup") as startupfile:
             fullfile = startupfile.read()
             if "ifup" in fullfile:
@@ -152,10 +185,9 @@ if os.path.isdir(path):
                                 interfaceslist.append(tmpinterface)
                                 iplist.append(matches[0])
                                 switch = False
-            machines.append(machine(hostname,interfaceslist,iplist,rules,subnets,ports))
+            machines.append(machine(hostname,interfaceslist,iplist,rules,subnets,ports,routes))
         startupfile.close()
     allsubnets = list(dict.fromkeys(allsubnets))
-
     while True:
         check = input("1 - Make draw.io image\n2 - Output data to screen\n3 - Make linfo image\n4 - Exit\n>")
         if check == "1":
@@ -176,7 +208,7 @@ if os.path.isdir(path):
                     label="")
             '''
             for subnet in allsubnets:
-                diagram.add_node(xmlId=subnet.replace("/","."),
+                diagram.add_node(xmlId,
                 hostname = "",
                 rules="",
                 ports="",
@@ -195,13 +227,6 @@ if os.path.isdir(path):
 
             diagram.layout(algo="circle")
             diagram.dump_file(filename="Sample_graph.drawio", folder="./")
-            # with open("Sample_graph.drawio","r+") as file:
-            #     file.seek(0)
-            #     file.write("""<mxGraphModel dx="1098" dy="583" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="827" pageHeight="1169" math="0" shadow="0">
-            #       <root>""")
-            # with open("Sample_graph.drawio","a") as file:
-            #     file.write("""</root>
-            #     </mxGraphModel>""")
         elif check == "2":
             for subnet in allsubnets:
                 print(f"\n{Colour.White}{'-'*10}\nSubnet {subnet}\n{'-'*10}{Colour.Reset}")
