@@ -305,15 +305,13 @@ if os.path.isdir(path):
                     )
 
             for subnet in allsubnets:
-                # subnetXmlId = subnet.replace("/",".")
-
                 diagram.addSubnet(f"{subnet}",f"{subnet}")
                 # print(subnet)
             for subnet in allsubnets:
                 for machine in machines:
                     if subnet in machine.subnets:
-                        # subnetXmlId = subnet.replace("/",".")
                         interface = machine.interfaces[(machine.subnets.index(subnet))]
+                        print(f"Machine = {machine.hostname} Interface - {interface} Subnet = {subnet}\n")
                         diagram.add_link(f"{subnet}",machine.hostname+f"-{interface}ip")
 
             defaultLineStyle=r"fillColor=#a20025;strokeColor=#6F0000;strokeWidth=3;"
