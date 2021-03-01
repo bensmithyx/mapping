@@ -40,16 +40,12 @@ class customDiagram(drawio_diagram):
         formatted=subnetTemplate.format(xmlId=xmlId,value=value,x_pos=str(random.randint(0,self.gridMax)),y_pos=str(random.randint(0,self.gridMax)),width=width,height=height)
         self.addToNodes(formatted)
 
-
     def addSubnet(self,xmlId,subnet,width=120,height=60,x_pos=300,y_pos=200,**kwargs):
-
         self.node_data={}
         if super(customDiagram, self)._node_exists(xmlId, hostname=subnet):
             return
         self.nodes_ids[self.current_diagram_id].append(xmlId)
         self.subnetRectangle(xmlId,subnet,x_pos,y_pos,width,height)
-
-
     # overloading the add_link to bypass node checks, we already know the node exists because we make it before a connection but causes errors if it's not removed
     def add_link(
         self,
@@ -66,29 +62,6 @@ class customDiagram(drawio_diagram):
         link_id=None,
         **kwargs
     ):
-        """
-        Method to add link between nodes to the diagram.
-        **Parameters**
-        * ``source`` (str) mandatory, source node id
-        * ``source`` (str) mandatory, target node id
-        * ``label`` (str) link label to display at the centre of the link
-        * ``data`` (dict) dictionary of key value pairs to add as link data
-        * ``url`` (str) url string to save as link ``url`` attribute
-        * ``style`` (str) string or OS path to text file with style to apply to the link
-        * ``src_label`` (str) link label to display next to source node
-        * ``trgt_label`` (str) link label to display next to target node
-        * ``src_label_style`` (str) source label style string
-        * ``trgt_label_style`` (str) target label style string
-        * ``link_id`` (str or int) optional link id value, must be unique across all links
-        Sample DrawIO style string for the link::
-            endArrow=classic;fillColor=#f8cecc;strokeColor=#FF3399;dashed=1;
-            edgeStyle=entityRelationEdgeStyle;startArrow=diamondThin;startFill=1;
-            endFill=0;strokeWidth=5;
-        .. note:: If source or target nodes does not exists, they will be automatically
-          created
-
-        All labels are optional and substituted with empty values to calculate link id.
-        """
         link_data = {}
         # check type of source and target attribute
         source_node_dict = source.copy() if isinstance(source, dict) else {"id": source}
@@ -161,10 +134,6 @@ class customDiagram(drawio_diagram):
         # save link to graph
         self.current_root.append(link)
 
-
-
-
-
     def add_machine(self,xmlId,hostname,rules,ports,eth0,eth1,eth2,ipe0,ipe1,ipe2,label="",data={},url="",style="",width=120,height=60,x_pos=200,y_pos=150,**kwargs):
         # added hostname to exist check
         self.node_data = {}
@@ -177,57 +146,48 @@ class customDiagram(drawio_diagram):
         if os.path.isfile(style[:5000]):
             with open(style, "r") as style_file:
                 style = style_file.read()
-        #x="250" y="240" width="239" height="220"
-        #  <mxGeometry width="239" height="180" as="geometry" />
         #add container
-
         self.addContainer(xmlId,0,300,239,220)
         #add individual rectangle
-
         #Rules
+        if ipe0 and ipe2:
+            ruleswidth = 238.5
+            padding = 0
+        elif ipe0 and not ipe2:
+            ruleswidth = 178.5
+            padding = 0
+        elif ipe2 and not ipe0:
+            ruleswidth = 178.5
+            padding = 60
         # <mxGeometry x="0.5" y="180" width="238.5" height="40" as="geometry" />
-        self.addRectangle(f"{xmlId}-rules",f"{xmlId}-3",f"{rules}",0.5,180,238.5,40)
-
-        #empty
-        #   <mxGeometry width="239" height="180" as="geometry" />
-        # self.addRectangle(f"{xmlId}-empty1",f"{xmlId}-3",f"{xmlId}-empty",x_pos,y_pos,239,180)
-
+        self.addRectangle(f"{xmlId}-rules",f"{xmlId}-3",f"{rules}",0.5+padding,180,ruleswidth,40)
         #ports
         # <mxGeometry x="60" y="90" width="120" height="90" as="geometry" />
         self.addRectangle(f"{xmlId}-ports",f"{xmlId}-3",f"{ports}",60,90,120,90)
-
         #eth2
-        # <mxGeometry x="135" y="105" width="120" height="30" as="geometry" />
-        self.addRectangle(f"{xmlId}-eth2",f"{xmlId}-3",f"eth2",135,105,120,30,"rotation=-90;")
-
-        #eth0
-        # <mxGeometry x="-15" y="105" width="120" height="30" as="geometry" />
-        self.addRectangle(f"{xmlId}-eth0",f"{xmlId}-3",f"eth0",-15,105,120,30,"rotation=90;")
-
-        #ip - eth2ip
-        # <mxGeometry x="164" y="105" width="120" height="30" as="geometry" />
-        self.addRectangle(f"{xmlId}-eth2ip",f"{xmlId}-3",f"{ipe2}",164,105,120,30,"rotation=-90;")
-
-        #ip2 - eth0ip
-        #<mxGeometry x="-45" y="105" width="120" height="30" as="geometry" />
-        self.addRectangle(f"{xmlId}-eth0ip",f"{xmlId}-3",f"{ipe0}",-45,105,120,30,"rotation=90;")
-
-        #eth1 -
-        # <mxGeometry x="60" y="30" width="120" height="30" as="geometry" />
-        self.addRectangle(f"{xmlId}-eth1",f"{xmlId}-3",f"eth1",60,30,120,30)
-
-        #eth1ip
-        # <mxGeometry x="60" width="120" height="30" as="geometry" />
-        self.addRectangle(f"{xmlId}-eth1ip",f"{xmlId}-3",f"{ipe1}",60,0,120,30)
-
+        if ipe2:
+            # <mxGeometry x="135" y="105" width="120" height="30" as="geometry" />
+            self.addRectangle(f"{xmlId}-eth2",f"{xmlId}-3",f"eth2",135,105,120,30,"rotation=-90;")
+            # <mxGeometry x="164" y="105" width="120" height="30" as="geometry" />
+            self.addRectangle(f"{xmlId}-eth2ip",f"{xmlId}-3",f"{ipe2}",164,105,120,30,"rotation=-90;")
+        if ipe0:
+            #eth0
+            # <mxGeometry x="-15" y="105" width="120" height="30" as="geometry" />
+            self.addRectangle(f"{xmlId}-eth0",f"{xmlId}-3",f"eth0",-15,105,120,30,"rotation=90;")
+            #ip - eth2ip
+            #ip2 - eth0ip
+            #<mxGeometry x="-45" y="105" width="120" height="30" as="geometry" />
+            self.addRectangle(f"{xmlId}-eth0ip",f"{xmlId}-3",f"{ipe0}",-45,105,120,30,"rotation=90;")
+        if ipe1:
+            #eth1 -
+            # <mxGeometry x="60" y="30" width="120" height="30" as="geometry" />
+            self.addRectangle(f"{xmlId}-eth1",f"{xmlId}-3",f"eth1",60,30,120,30)
+            #eth1ip
+            # <mxGeometry x="60" width="120" height="30" as="geometry" />
+            self.addRectangle(f"{xmlId}-eth1ip",f"{xmlId}-3",f"{ipe1}",60,0,120,30)
         #hostname
         # <mxGeometry x="60" y="60" width="120" height="30" as="geometry" />
         self.addRectangle(f"{xmlId}-hostname",f"{xmlId}-3",f"{hostname}",60,60,120,30)
-
-        # self.addRectangle(f"{xmlId}-1",f"{xmlId}-3",f"{xmlId}-value",0,0,width,height)
-        # self.addRectangle(f"{xmlId}-2",f"{xmlId}-3",f"{xmlId}-value2",0,height,width,height)
-        # self.addRectangle(f"{xmlId}-1",f"{xmlId}-3",f"{xmlId}-value","410","180",width,height)
-        # self.addRectangle(f"{xmlId}-2",f"{xmlId}-3",f"{xmlId}-value2","410","240",width,height)
 
 path = sys.argv[1]
 if os.path.isdir(path):
@@ -339,39 +299,22 @@ if os.path.isdir(path):
                     eth0= "eth0",
                     eth1= "eth1",
                     eth2= "eth2",
-                    ipe0= machine.ips[machine.interfaces.index("eth0")]  if "eth0" in machine.interfaces else "",
-                    ipe1= machine.ips[machine.interfaces.index("eth1")] if "eth1" in machine.interfaces else "",
-                    ipe2= machine.ips[machine.interfaces.index("eth2")]  if "eth2" in machine.interfaces else "",
+                    ipe0= machine.ips[machine.interfaces.index("eth0")]  if "eth0" in machine.interfaces else 0,
+                    ipe1= machine.ips[machine.interfaces.index("eth1")] if "eth1" in machine.interfaces else 0,
+                    ipe2= machine.ips[machine.interfaces.index("eth2")]  if "eth2" in machine.interfaces else 0,
                     )
-            '''
-            for subnet in allsubnets:
-                diagram.add_node(xmlId,
-                hostname = "",
-                rules="",
-                ports="",
-                eth0= "",
-                eth1= "",
-                eth2= "",
-                ipe0= "",
-                ipe1= "",
-                ipe2= "",
-                label="")'''
 
             for subnet in allsubnets:
                 # subnetXmlId = subnet.replace("/",".")
 
                 diagram.addSubnet(f"{subnet}",f"{subnet}")
                 # print(subnet)
-            '''for subnet in allsubnets:
-                for machine in machines:
-                    if subnet in machine.subnets:
-                        diagram.add_link(subnet, machine.hostname)'''
             for subnet in allsubnets:
                 for machine in machines:
                     if subnet in machine.subnets:
                         # subnetXmlId = subnet.replace("/",".")
-
-                        diagram.add_link(f"{subnet}",machine.hostname+"-eth0ip")
+                        interface = machine.interfaces[(machine.subnets.index(subnet))]
+                        diagram.add_link(f"{subnet}",machine.hostname+f"-{interface}ip")
 
             # diagram.layout(algo="kk")
             diagram.dump_file(filename="Sample_graph.drawio", folder="./")
