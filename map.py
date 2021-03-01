@@ -1,9 +1,7 @@
 #!/usr/bin/env python3
 # Created By Ben Smith and Joe Butler
 from N2G import drawio_diagram
-import re, ipaddress, os, sys
-import random
-import hashlib
+import re, ipaddress, os, sys, random, hashlib
 # overloading drawio_diagram functions
 import xml.etree.ElementTree as ET
 class customDiagram(drawio_diagram):
@@ -285,12 +283,14 @@ if os.path.isdir(path):
                                 switch = False
             machines.append(machine(hostname,interfaceslist,iplist,rules,subnets,ports,routes))
         startupfile.close()
+
     allsubnets = list(dict.fromkeys(allsubnets))
     while True:
         check = input("1 - Make draw.io image\n2 - Output data to screen\n3 - Make linfo image\n4 - Exit\n>")
         if check == "1":
             diagram = customDiagram()
             diagram.add_diagram("Page-1")
+
             for machine in machines:
                 diagram.add_machine(
                     xmlId=machine.hostname,
@@ -304,7 +304,6 @@ if os.path.isdir(path):
                     ipe1= machine.ips[machine.interfaces.index("eth1")] if "eth1" in machine.interfaces else 0,
                     ipe2= machine.ips[machine.interfaces.index("eth2")]  if "eth2" in machine.interfaces else 0,
                     )
-
             for subnet in allsubnets:
                 diagram.addSubnet(f"{subnet}",f"{subnet}")
             for subnet in allsubnets:
@@ -332,7 +331,7 @@ if os.path.isdir(path):
                                 elif machine.routes[ipAddress] == "normal":
                                     diagram.add_link(f"{machine.hostname}-{sourceInterface}ip",f"{destinationMachine.hostname}-{destinationInterface}ip",style=normalLineStyle)
 
-            # diagram.layout(algo="kk")
+
             diagram.dump_file(filename="Sample_graph.drawio", folder="./")
         elif check == "2":
             for subnet in allsubnets:
