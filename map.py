@@ -1,3 +1,4 @@
+# Created By Ben Smith and Joe Butler 
 #!/usr/bin/env python3
 from N2G import drawio_diagram
 import re, ipaddress, os, sys
@@ -333,13 +334,8 @@ if os.path.isdir(path):
                                 elif machine.routes[ipAddress] == "normal":
                                     diagram.add_link(f"{machine.hostname}-{sourceInterface}ip",f"{destinationMachine.hostname}-{destinationInterface}ip",style=normalLineStyle)
 
-
-
             # diagram.layout(algo="kk")
             diagram.dump_file(filename="Sample_graph.drawio", folder="./")
-            # with open("Sample_graph.drawio","r+") as f:
-            #     content = f.read()
-            #     objPattern = r""
         elif check == "2":
             for subnet in allsubnets:
                 print(f"\n{Colour.White}{'-'*10}\nSubnet {subnet}\n{'-'*10}{Colour.Reset}")
