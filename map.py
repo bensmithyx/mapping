@@ -3,65 +3,35 @@ from N2G import drawio_diagram
 import re, ipaddress, os, sys
 import random
 # overloading drawio_diagram functions
-
 import xml.etree.ElementTree as ET
+
 class customDiagram(drawio_diagram):
-    counter=0
-    # def __init__(self,*args, **kwargs):
-    #     self.drawing = ET.fromstring(self.drawio_drawing_xml)
-    #     self.nodes_ids = {}  # dictionary of {diagram_name: [node_id1, node_id2]}
-    #     self.edges_ids = {}  # dictionary of {diagram_name: [edge_id1, edge_id2]}
-    #     self.node_duplicates = node_duplicates
-    #     self.link_duplicates = link_duplicates
-    #     self.current_diagram = None
-    #     self.current_diagram_id = ""
-    #     self.default_node_style = "rounded=1;whiteSpace=wrap;html=1;"
-    #     self.default_link_style = "endArrow=none;"
-    #     self.default_link_label_style = "labelBackgroundColor=#ffffff;"
-        # <mxGeometry relative="1" as="geometry"/>
-        #https://jgraph.github.io/mxgraph/docs/js-api/files/model/mxGeometry-js.html
-        #super(customDiagram, self).__init__(*args,**kwargs)
 
-        #variables to change - hostname, rules, ports, eth0, eth1, eth2, ipe0, ipe1, ipe2, xmlId
+    def addToNodes(self,formattedXML):
+        node = ET.fromstring(formattedXML)
+        self.current_root.append(node)
+
+    def addRectangle(self,xmlId,parentId,value,x_pos,y_pos,width,height):
+        rectangle="""
+                <mxCell id="{id}" value="{value}" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#2a2a2a;" vertex="1" parent="{parentId}">
+                    <mxGeometry x="{x_pos}" y="{y_pos}" width="{width}" height="{height}" as="geometry" />
+            </mxCell>
+                """
+        formatted=rectangle.format(id=xmlId,value=value,parentId=parentId,style=self.default_node_style,x_pos=x_pos,y_pos=y_pos,width=120,height=60)
+        self.addToNodes(formatted)
+
+    def addContainer(self,xmlId,x_pos,y_pos,width,height):
+        containerTemplate="""
+        <mxCell id="{id}-3" value="" style="group" vertex="1" connectable="0" parent="1">
+            <mxGeometry x="{x_pos}" y="{y_pos}" width="120" height="120" as="geometry" />
+            </mxCell>
+                """
+        formatted=containerTemplate.format(id=xmlId,label=xmlId,style=self.default_node_style,x_pos=str(random.randint(100,500)),y_pos=str(random.randint(100,500)),width=120,height=60)
+        self.addToNodes(formatted)
+
     def add_node(self,xmlId,hostname,rules,ports,eth0,eth1,eth2,ipe0,ipe1,ipe2,label="",data={},url="",style="",width=120,height=60,x_pos=200,y_pos=150,**kwargs):
-        #reset xml entity
-        self.counter+=1
-        print(self.counter)
-        template = """<object id="{id}" label="{label}">
-      <mxCell style="{style}" vertex="1" parent="1">
-          <mxGeometry x="{x_pos}" y="{y_pos}" width="{width}" height="{height}" as="geometry"/>
-      </mxCell>
-    </object>"""
-
-        """
-
-    <object id="{id}" label="{label}">
-      <mxCell style="{style}" vertex="1" parent="1">
-          <mxGeometry x="{x_pos}" y="{y_pos}" width="{width}" height="{height}" as="geometry"/>
-      </mxCell>
-    </object>
-
-        """
-
-        '''template="""<object id="{xmlId}-objId" label="label"><mxCell id="{xmlId}--1" value="" style="group" parent="1" vertex="1" connectable="0"><mxGeometry x="250" y="240" width="239" height="220" as="geometry" /></mxCell><mxCell id="{xmlId}--2" value="{rules}" style="rounded=0;whiteSpace=wrap;html=1;shadow=0;glass=0;sketch=0;" parent="{xmlId}--1" vertex="1"><mxGeometry x="0.5" y="180" width="238.5" height="40" as="geometry" /></mxCell><mxCell id="{xmlId}--3" value="" style="group;fillColor=none;gradientColor=none;rounded=1;shadow=0;glass=0;sketch=0;" parent="{xmlId}--1" vertex="1" connectable="0"><mxGeometry width="239" height="180" as="geometry" /></mxCell><mxCell id="{xmlId}--4" value="{ports}" style="rounded=0;whiteSpace=wrap;html=1;" parent="{xmlId}--3" vertex="1"><mxGeometry x="60" y="90" width="120" height="90" as="geometry" /></mxCell><mxCell id="{xmlId}--5" value="{eth2}" style="rounded=0;whiteSpace=wrap;html=1;rotation=-90;" parent="{xmlId}--3" vertex="1"><mxGeometry x="135" y="105" width="120" height="30" as="geometry" /></mxCell><mxCell id="{xmlId}--6" value="{eth0}" style="rounded=0;whiteSpace=wrap;html=1;rotation=90;" parent="{xmlId}--3" vertex="1"><mxGeometry x="-15" y="105" width="120" height="30" as="geometry" /></mxCell><mxCell id="{xmlId}--7" value="{ipe2}" style="rounded=0;whiteSpace=wrap;html=1;rotation=-90;" parent="{xmlId}--3" vertex="1"><mxGeometry x="164" y="105" width="120" height="30" as="geometry" /></mxCell><mxCell id="{xmlId}--8" value="{ipe0}" style="rounded=0;whiteSpace=wrap;html=1;rotation=90;" parent="{xmlId}--3" vertex="1"><mxGeometry x="-45" y="105" width="120" height="30" as="geometry" /></mxCell><mxCell id="{xmlId}--9" value="{eth1}" style="rounded=0;whiteSpace=wrap;html=1;rotation=0;" parent="{xmlId}--3" vertex="1"><mxGeometry x="60" y="30" width="120" height="30" as="geometry" /></mxCell><mxCell id="{xmlId}--10" value="{ipe1}" style="rounded=0;whiteSpace=wrap;html=1;rotation=0;" parent="{xmlId}--3" vertex="1"><mxGeometry x="60" width="120" height="30" as="geometry" /></mxCell><mxCell id="{xmlId}--11" value="{hostname}" style="rounded=0;whiteSpace=wrap;html=1;" parent="{xmlId}--3" vertex="1"><mxGeometry x="60" y="60" width="120" height="30" as="geometry" /></mxCell></object>"""
-        '''
-        """
-        Method to add node to the diagram.
-        **Parameters**
-        * xmlId (str) mandatory, unique node identifier, usually equal to node name
-        * hostname hostname of machine
-        * label (str) node label, if not provided, set equal to id
-        * data (dict) dictionary of key value pairs to add as node data
-        * url (str) url string to save as node url attribute
-        * width (int) node width in pixels
-        * height (int) node height in pixels
-        * x_pos (int) node position on x axis
-        * y_pos (int) node position on y axis
-        * style (str) string containing DrawIO style parameters to apply to the node
-        """
-
         # added hostname to exist check
-        node_data = {}
+        self.node_data = {}
         if super(customDiagram, self)._node_exists(xmlId, label=label,hostname=hostname, data=data, url=url):
             return
         self.nodes_ids[self.current_diagram_id].append(xmlId)
@@ -91,25 +61,12 @@ class customDiagram(drawio_diagram):
         #     y_pos=y_pos,
         #     style=style if style else self.default_node_style,
         # )
-        # print(f"\n\n\n\{formatted}\n\n\n")
-        #run pls
-        # formatted = template.format(id=xmlId)
 
-        self.drawio_node_object_xml = """<object id="{id}" label="{label}">
-      <mxCell style="{style}" vertex="1" parent="1">
-          <mxGeometry x="{x_pos}" y="{y_pos}" width="{width}" height="{height}" as="geometry"/>
-      </mxCell>
-    </object>"""
-        formatted=self.drawio_node_object_xml.format(id=xmlId,label=xmlId,style=self.default_node_style,x_pos=x_pos,y_pos=y_pos,width=120,height=60)
-        self.drawio_node_object_xml=self.drawio_node_object_xml.format(id=xmlId,label=label,style=self.default_node_style,x_pos=x_pos,y_pos=y_pos,width=120,height=60)
-        self.drawio_node_object_xml=formatted
-        node = ET.fromstring(formatted)
-        # add data attributes and/or url to node
-        node_data.update(data)
-        node_data.update(kwargs)
-        node = super(customDiagram, self)._add_data_or_url(node, node_data, url)
-        self.current_root.append(node)
-
+        #add container
+        self.addContainer(xmlId,x_pos,y_pos,width,height)
+        #add individual rectangle
+        self.addRectangle(f"{xmlId}-1",f"{xmlId}-3",f"{xmlId}","410","180",width,height)
+        self.addRectangle(f"{xmlId}-2",f"{xmlId}-3",f"{xmlId}","410","240",width,height)
 
 path = sys.argv[1]
 if os.path.isdir(path):
@@ -139,7 +96,7 @@ if os.path.isdir(path):
         file = files.read()
 
     # Find all hostnames and removing duplicates
-    hostnames_with_duplicates = re.findall(".+?(?=\[)",file)
+    hostnames_with_duplicates = re.findall(r".+?(?=\[)",file)
     hostnames = list(dict.fromkeys(hostnames_with_duplicates))
     files.close()
     # List to store machines on network
