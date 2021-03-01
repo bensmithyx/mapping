@@ -12,13 +12,13 @@ class customDiagram(drawio_diagram):
         node = ET.fromstring(formattedXML)
         self.current_root.append(node)
 
-    def addRectangle(self,xmlId,parentId,value,x_pos,y_pos,width,height,rotateStyle=""):
+    def addRectangle(self,xmlId,parentId,value,x_pos,y_pos,width,height,colour,rotateStyle=""):
         rectangle="""
                 <mxCell id="{id}" value="{value}" style="rounded=0;whiteSpace=wrap;html=1;fillColor={fillColour};{rotateStyle}" vertex="1" parent="{parentId}">
                     <mxGeometry x="{x_pos}" y="{y_pos}" width="{width}" height="{height}" as="geometry" />
             </mxCell>
                 """
-        formatted=rectangle.format(id=xmlId,value=value,parentId=parentId,style=self.default_node_style,x_pos=x_pos,y_pos=y_pos,width=width,height=height,fillColour=self.fillColour,rotateStyle=rotateStyle)
+        formatted=rectangle.format(id=xmlId,value=value,parentId=parentId,style=self.default_node_style,x_pos=x_pos,y_pos=y_pos,width=width,height=height,fillColour=colour,rotateStyle=rotateStyle)
         self.addToNodes(formatted)
 
     def addContainer(self,xmlId,x_pos,y_pos,width,height):
@@ -160,34 +160,34 @@ class customDiagram(drawio_diagram):
             ruleswidth = 178.5
             padding = 60
         # <mxGeometry x="0.5" y="180" width="238.5" height="40" as="geometry" />
-        self.addRectangle(f"{xmlId}-rules",f"{xmlId}-3",f"{rules}",0.5+padding,180,ruleswidth,40)
+        self.addRectangle(f"{xmlId}-rules",f"{xmlId}-3",f"{rules}",0.5+padding,180,ruleswidth,40,"#ACF3CF")
         #ports
         # <mxGeometry x="60" y="90" width="120" height="90" as="geometry" />
-        self.addRectangle(f"{xmlId}-ports",f"{xmlId}-3",f"{ports}",60,90,120,90)
+        self.addRectangle(f"{xmlId}-ports",f"{xmlId}-3",f"{ports}",60,90,120,90,"#ACF3CF")
         #eth2
         if ipe2:
             # <mxGeometry x="135" y="105" width="120" height="30" as="geometry" />
-            self.addRectangle(f"{xmlId}-eth2",f"{xmlId}-3",f"eth2",135,105,120,30,"rotation=-90;")
+            self.addRectangle(f"{xmlId}-eth2",f"{xmlId}-3",f"eth2",135,105,120,30,"#E5D67A","rotation=-90;",)
             # <mxGeometry x="164" y="105" width="120" height="30" as="geometry" />
-            self.addRectangle(f"{xmlId}-eth2ip",f"{xmlId}-3",f"{ipe2}",164,105,120,30,"rotation=-90;")
+            self.addRectangle(f"{xmlId}-eth2ip",f"{xmlId}-3",f"{ipe2}",164,105,120,30,"#E5D67A","rotation=-90;",)
         if ipe0:
             #eth0
             # <mxGeometry x="-15" y="105" width="120" height="30" as="geometry" />
-            self.addRectangle(f"{xmlId}-eth0",f"{xmlId}-3",f"eth0",-15,105,120,30,"rotation=90;")
+            self.addRectangle(f"{xmlId}-eth0",f"{xmlId}-3",f"eth0",-15,105,120,30,"#B593E1","rotation=90;")
             #ip - eth2ip
             #ip2 - eth0ip
             #<mxGeometry x="-45" y="105" width="120" height="30" as="geometry" />
-            self.addRectangle(f"{xmlId}-eth0ip",f"{xmlId}-3",f"{ipe0}",-45,105,120,30,"rotation=90;")
+            self.addRectangle(f"{xmlId}-eth0ip",f"{xmlId}-3",f"{ipe0}",-45,105,120,30,"#B593E1","rotation=90;")
         if ipe1:
             #eth1 -
             # <mxGeometry x="60" y="30" width="120" height="30" as="geometry" />
-            self.addRectangle(f"{xmlId}-eth1",f"{xmlId}-3",f"eth1",60,30,120,30)
+            self.addRectangle(f"{xmlId}-eth1",f"{xmlId}-3",f"eth1",60,30,120,30,"#93DCE1")
             #eth1ip
             # <mxGeometry x="60" width="120" height="30" as="geometry" />
-            self.addRectangle(f"{xmlId}-eth1ip",f"{xmlId}-3",f"{ipe1}",60,0,120,30)
+            self.addRectangle(f"{xmlId}-eth1ip",f"{xmlId}-3",f"{ipe1}",60,0,120,30,"#93DCE1")
         #hostname
         # <mxGeometry x="60" y="60" width="120" height="30" as="geometry" />
-        self.addRectangle(f"{xmlId}-hostname",f"{xmlId}-3",f"{hostname}",60,60,120,30)
+        self.addRectangle(f"{xmlId}-hostname",f"{xmlId}-3",f"{hostname}",60,60,120,30,"#E76B6B")
 
 path = sys.argv[1]
 if os.path.isdir(path):
@@ -237,7 +237,7 @@ if os.path.isdir(path):
             routes = {}
             # Finding all need data from files
             for line in filecontents:
-                if "ifconfig" in line:
+                if "ifconfig" in line and "#ifconfig" not in line:
                     if "netmask" in line:
                         matches = re.findall(r"netmask\s+([\d\.]+)",line)
                         netmask = matches[0]
@@ -251,15 +251,15 @@ if os.path.isdir(path):
                         iplist.append(line.split()[2][:-3])
                         subnets.append(str(ipaddress.IPv4Interface(line.split()[2]).network))
                         allsubnets.append(str(ipaddress.IPv4Interface(line.split()[2]).network))
-                if "iptables" in line:
+                if "iptables" in line and "#iptables" not in line:
                     rules.append(line)
-                if "for i in" in line:
+                if "for i in" in line and "#for i in" not in line:
                     matches = re.findall(r"([\d]+)",line)
                     for port in matches:
                         ports.append(port)
-                elif "service" in line or "start" in line:
+                elif "service" in line or "start" in line and "#" not in line:
                     ports.append(line)
-                if "route add" in line:
+                if "route add" in line and "#route add" not in line:
                     matches = re.findall(r"gw\s+([\d\.]+)",line)
                     if line.split()[2] == "default":
                         routes[matches[0]] = "default"
@@ -315,6 +315,27 @@ if os.path.isdir(path):
                         # subnetXmlId = subnet.replace("/",".")
                         interface = machine.interfaces[(machine.subnets.index(subnet))]
                         diagram.add_link(f"{subnet}",machine.hostname+f"-{interface}ip")
+
+            defaultLineStyle=r"fillColor=#a20025;strokeColor=#6F0000;strokeWidth=3;"
+            normalLineStyle=r"fillColor=#1ba1e2;strokeColor=#006EAF;strokeWidth=3;"
+
+            for machine in machines:
+                if len(machine.routes)>0:
+                    destinationIps = [ipAddress for ipAddress in machine.routes.keys()]
+                # print(f"{machine.hostname} - {destinationIps}")
+                    for ipAddress in destinationIps:
+                        #search other machines to see which machine the ip address belongs to
+                        for destinationMachine in machines:
+                            if ipAddress in destinationMachine.ips:
+                                destinationInterface = destinationMachine.interfaces[(destinationMachine.ips.index(ipAddress))]
+                                destinationSubnet = destinationMachine.subnets[(destinationMachine.ips.index(ipAddress))]
+                                sourceInterface = machine.interfaces[(machine.subnets.index(destinationSubnet))]
+                                if machine.routes[ipAddress] =="default":
+                                    diagram.add_link(f"{machine.hostname}-{sourceInterface}ip",f"{destinationMachine.hostname}-{destinationInterface}ip",style=defaultLineStyle)
+                                elif machine.routes[ipAddress] == "normal":
+                                    diagram.add_link(f"{machine.hostname}-{sourceInterface}ip",f"{destinationMachine.hostname}-{destinationInterface}ip",style=normalLineStyle)
+
+
 
             # diagram.layout(algo="kk")
             diagram.dump_file(filename="Sample_graph.drawio", folder="./")
