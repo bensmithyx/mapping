@@ -158,9 +158,13 @@ class customDiagram(drawio_diagram):
         elif ipe2 and not ipe0:
             ruleswidth = 178.5
             padding = 60
-        # <mxGeometry x="0.5" y="180" width="238.5" height="40" as="geometry" />
-        self.addRectangle(f"{xmlId}-rules",f"{xmlId}-3",f"{rules}",0.5+padding,180,ruleswidth,40,"#ACF3CF")
+        if rules:
+            rulesheight = (len(rules)/10)*300
+            rules = "\n".join(rules)
+            # <mxGeometry x="0.5" y="180" width="238.5" height="40" as="geometry" />
+            self.addRectangle(f"{xmlId}-rules",f"{xmlId}-3",f"{rules}",0.5+padding,180,ruleswidth,40+rulesheight,"#ACF3CF")
         #ports
+        ports = "\n".join(ports)
         # <mxGeometry x="60" y="90" width="120" height="90" as="geometry" />
         self.addRectangle(f"{xmlId}-ports",f"{xmlId}-3",f"{ports}",60,90,120,90,"#ACF3CF")
         #eth2
@@ -190,6 +194,8 @@ class customDiagram(drawio_diagram):
 
 path = sys.argv[1]
 if os.path.isdir(path):
+    if path[:-1] == "/":
+        path = path[:-1]
     os.system(f"sed -i 's/\"//g' {path}/lab.conf")
     # Adding in colourful text
     class Colour:
