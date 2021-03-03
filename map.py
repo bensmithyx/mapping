@@ -270,23 +270,40 @@ if os.path.isdir(path):
                         routes[matches[0]] = "default"
                     elif line.split()[2] == "-net":
                         routes[matches[0]] = "normal"
-
+                if "ip addr add" in line and "#ip addr add" not in line:
+                    interfaceslist.append(line.split()[-1])
+                    iplist.append(line.split()[3][:-3])
+                    subnets.append(str(ipaddress.IPv4Interface(line.split()[3]).network))
+                    allsubnets.append(str(ipaddress.IPv4Interface(line.split()[3]).network))
         with open(f"{path}/{hostname}.startup") as startupfile:
             fullfile = startupfile.read()
             if "ifup" in fullfile:
                 with open(f"{path}/{hostname}/etc/network/interfaces","r") as interfacefile:
                     contents = interfacefile.readlines()
                     switch = False
+                    switch2 = False
+                    tmpinterface = ""
+                    tmpmatches = ""
                     for line in contents:
                         if "iface" in line and "iface lo" not in line:
                             switch = True
                             tmpinterface = line.split()[1]
                         matches = re.findall(r"address\s+([\d\.]+)",line)
                         if matches:
-                            if switch:
-                                interfaceslist.append(tmpinterface)
-                                iplist.append(matches[0])
-                                switch = False
+                            tmpmatches = matches
+                            switch2 = True
+                        netmask = re.findall(r"netmask\s+([\d\.]+)",line)
+                        if netmask:
+                            if switch2:
+                                if switch:
+                                    interfaceslist.append(tmpinterface)
+                                    iplist.append(tmpmatches[0])
+                                    netmask = netmask[0]
+                                    cidr = sum([bin(int(x)).count('1') for x in netmask.split('.')])
+                                    subnets.append(str(ipaddress.IPv4Interface(tmpmatches[0]+'/'+str(cidr)).network))
+                                    allsubnets.append(str(ipaddress.IPv4Interface(tmpmatches[0]+'/'+str(cidr)).network))
+                                    switch = False
+                                    switch2 = False
             machines.append(machine(hostname,interfaceslist,iplist,rules,subnets,ports,routes))
         startupfile.close()
 
@@ -336,7 +353,6 @@ if os.path.isdir(path):
                                     diagram.add_link(f"{machine.hostname}-{sourceInterface}ip",f"{destinationMachine.hostname}-{destinationInterface}ip",style=defaultLineStyle)
                                 elif machine.routes[ipAddress] == "normal":
                                     diagram.add_link(f"{machine.hostname}-{sourceInterface}ip",f"{destinationMachine.hostname}-{destinationInterface}ip",style=normalLineStyle)
-
 
             diagram.dump_file(filename="Sample_graph.drawio", folder="./")
         elif check == "2":
