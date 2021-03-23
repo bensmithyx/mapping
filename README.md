@@ -7,7 +7,7 @@ git clone https://github.com/cyb3rchad/mapping.git
 
 # Run
 ```
-python3 map.py <path to directory of lab.conf without / on the end e.g (/home/user/labinfo)>
+python3 map.py <path to directory of lab.conf
 ```
 
 # Options
